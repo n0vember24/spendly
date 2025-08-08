@@ -7,4 +7,5 @@ router = Router()
 
 @router.message(Command('start'))
 async def start(msg: Message):
-    await msg.answer('Hello, hello!')
+    await msg.answer(
+        'Добро пожаловать в Spendly!\nЭтот бот поможет тебе в управлении с твоими расходами\n/help - для подробностей')
