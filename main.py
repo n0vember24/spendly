@@ -1,8 +1,7 @@
 import asyncio
-import logging
 
-from bot.config.loader import validate_config
 from bot.core.bot import bot, dp
+from bot.core.config import validate_config
 from bot.handlers import register_handlers
 from bot.utils.logger import setup_logger
 

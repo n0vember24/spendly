@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
-from bot.config.loader import Config
+from bot.core.config import Config
 
 
 def setup_logger(base_log_dir: str = 'logs'):

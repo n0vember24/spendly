@@ -1,1 +1,5 @@
 aiogram
+sqlalchemy
+sqlalchemy[asyncio]
+aiosqlite
+asyncpg
