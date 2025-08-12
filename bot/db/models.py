@@ -12,7 +12,7 @@ class User(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
 
     expenses = relationship('Expense', back_populates='user', cascade='all, delete-orphan')
-    planned_expenses = relationship('PlannedExpense', back_populates='user', cascade='all, delete-orphan')
+    planned = relationship('PlannedExpense', back_populates='user', cascade='all, delete-orphan')
 
 
 class Expense(Base):
