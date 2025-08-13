@@ -8,6 +8,7 @@ from bot.core.config import Config
 
 def setup_logger(base_log_dir: str = 'logs'):
     now = datetime.now()
+    base_log_dir += '/dev' if Config.DEBUG else '/prod'
     log_dir = os.path.join(base_log_dir, now.strftime('%Y'), now.strftime('%m'))
     os.makedirs(log_dir, exist_ok=True)
 

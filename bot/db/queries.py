@@ -8,7 +8,7 @@ from bot.db.engine import async_session
 from bot.db.models import User, Expense, PlannedExpense
 
 
-async def get_user_by_tg(tg_id: int) -> Optional[Dict[str, Any]]:
+async def get_user_by_tg(tg_id: int) -> Optional[User]:
     try:
         async with async_session() as session:
             q = await session.execute(select(User).where(User.tg_id == tg_id))
@@ -18,10 +18,10 @@ async def get_user_by_tg(tg_id: int) -> Optional[Dict[str, Any]]:
         logging.exception(exc)
 
 
-async def create_user(tg_id: int, username: Optional[str], initial_balance: float = 0.0) -> None:
+async def create_user(tg_id: int, username: Optional[str], balance: float = 0.0) -> None:
     try:
         async with async_session() as session:
-            user = User(tg_id=tg_id, username=username, initial_balance=initial_balance)
+            user = User(tg_id=tg_id, username=username, balance=balance)
             session.add(user)
             await session.commit()
             await session.refresh(user)
@@ -46,10 +46,10 @@ async def add_expense(tg_id: int, amount: float, comment: Optional[str]) -> None
     try:
         async with async_session() as session:
             q = await session.execute(select(User).where(User.tg_id == tg_id))
-            user = q.scalar_one_or_none()
+            user: Optional[User] = q.scalar_one_or_none()
             if not user:
                 raise RuntimeError(f'User {tg_id} not found')
-            expense = Expense(user_id=tg_id, amount=amount, comment=comment)
+            expense = Expense(user_id=user.id, amount=amount, comment=comment)
             session.add(expense)
             await session.commit()
             await session.refresh(expense)
@@ -61,18 +61,18 @@ async def get_expenses(tg_id: int, limit: int = 50) -> Optional[List[Dict[str, A
     try:
         async with async_session() as session:
             q = await session.execute(select(User).where(User.tg_id == tg_id))
-            user = q.scalar_one_or_none()
+            user: Optional[User] = q.scalar_one_or_none()
             if not user:
                 raise RuntimeError(f'User {tg_id} not found')
             expenses = await session.execute(
-                select(Expense).where(Expense.user_id == tg_id).order_by(Expense.created_at.desc()).limit(limit))
+                select(Expense).where(Expense.user_id == user.id).order_by(Expense.created_at.desc()).limit(limit))
             total = expenses.scalars().all()
             return total
     except Exception as exc:
         logging.exception(exc)
 
 
-async def get_sum_expenses(tg_id: int) -> float:
+async def get_sum_expenses(tg_id: int) -> Optional[float]:
     try:
         async with async_session() as session:
             q = await session.execute(select(User).where(User.tg_id == tg_id))

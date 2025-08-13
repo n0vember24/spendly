@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, BigInteger, String, Float, DateTime, ForeignKey, Text, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Relationship
-from bot.db.engine import Base, async_session
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from bot.db.engine import Base
 
 
 class User(Base):

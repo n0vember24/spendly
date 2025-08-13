@@ -12,7 +12,7 @@ async def cmd_balance(msg: types.Message):
     if not user:
         await msg.answer('Сначала регистрация, команда /start')
         return
-    initial = float(user.get('initial_balance') or 0.0)
+    initial = float(user.balance or 0.0)
     spent = await q.get_sum_expenses(msg.from_user.id)
     current = initial - spent
     await msg.answer(f'Ваш баланс: {current}')

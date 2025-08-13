@@ -2,11 +2,10 @@ import asyncio
 import os
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from alembic import context
 
 config = context.config
 fileConfig(config.config_file_name)
@@ -15,8 +14,8 @@ fileConfig(config.config_file_name)
 import sys
 
 sys.path.append(os.getcwd())
-from bot.db.engine import Base
 from bot.core.config import Config
+from bot.db.models import *
 
 target_metadata = Base.metadata
 
