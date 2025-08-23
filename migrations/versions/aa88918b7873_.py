@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f61cfbcae973
+Revision ID: aa88918b7873
 Revises: 
-Create Date: 2025-08-14 00:20:48.487307
+Create Date: 2025-08-23 11:24:35.512093
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f61cfbcae973'
+revision: str = 'aa88918b7873'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,9 +24,10 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('tg_id', sa.BigInteger(), nullable=False),
-    sa.Column('username', sa.String(length=100), nullable=False),
+    sa.Column('username', sa.String(length=100), nullable=True),
     sa.Column('balance', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('tg_id'),
     sa.UniqueConstraint('username')
@@ -47,7 +48,7 @@ def upgrade() -> None:
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('remind_at', sa.DateTime(), nullable=False),
-    sa.Column('status', sa.String(length=10), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'completed', 'canceled', name='status_enum'), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

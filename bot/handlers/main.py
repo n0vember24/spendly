@@ -12,6 +12,7 @@ async def cmd_start(msg: Message):
     user = await q.get_user_by_tg(msg.from_user.id)
     if not user:
         await q.create_user(msg.from_user.id, msg.from_user.username)
+        await msg.answer('Ты зарегистрировался в боте')
     await msg.answer(
         'Добро пожаловать в Spendly!\n'
         'Этот бот поможет тебе в управлении с твоими расходами\n'
