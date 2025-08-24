@@ -1,34 +1,68 @@
 from aiogram import Router
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.db import queries as q
+from bot.states.balance import Balance
 
 router = Router()
 
 
 @router.message(Command('balance'))
 async def cmd_balance(msg: Message):
-    user = await q.get_user_by_tg(msg.from_user.id)
+    user = await q.get_user(msg.from_user.id)
     if not user:
-        await msg.answer('Сначала регистрация, команда /start')
-        return
-    initial = float(user.balance or 0.0)
-    spent = await q.get_sum_expenses(msg.from_user.id)
-    current = initial - spent
+        await q.create_user(msg.from_user.id, msg.from_user.username)
+        current = 0.0
+    else:
+        initial = float(user.balance)
+        spent = await q.get_spendings_sum(msg.from_user.id)
+        current = initial - spent
     await msg.answer(f'Ваш баланс: {current}')
 
 
 @router.message(Command('deposit'))
-async def deposit(msg: Message):
-    amount = msg.text.split(maxsplit=1)
-    if len(amount) < 2:
-        await msg.answer('Укажите корректную сумму для депозита, пример: /deposit 25000')
-        return
+async def cmd_deposit(msg: Message, state: FSMContext):
+    await msg.answer('Введите сумму депозита:')
+
+    user = await q.get_user(msg.from_user.id)
+    if not user:
+        await q.create_user(msg.from_user.id, msg.from_user.username)
+
+    await state.set_state(Balance.amount)
+
+
+@router.message(Balance.amount)
+async def balance_deposit_state(msg: Message, state: FSMContext):
     try:
-        amount = float(amount[1])
+        amount = float(msg.text.replace(' ', ''))
     except ValueError:
-        await msg.answer('Сумма должна быть числом')
+        await msg.answer('Введите корректную сумму:')
         return
+    await msg.answer('Успешно добавлено!')
     await q.add_balance(msg.from_user.id, amount)
-    await msg.answer(f'Успешно добавлено в баланс {amount}')
+    await state.clear()
+
+
+@router.message(Command('set'))
+async def cmd_set(msg: Message, state: FSMContext):
+    await msg.answer('Введите новую сумму вашего баланса:')
+
+    user = await q.get_user(msg.from_user.id)
+    if not user:
+        await q.create_user(msg.from_user.id, msg.from_user.username)
+
+    await state.set_state(Balance.amount)
+
+
+@router.message(Balance.amount)
+async def balance_set_state(msg: Message, state: FSMContext):
+    try:
+        amount = float(msg.text.replace(' ', ''))
+    except ValueError:
+        await msg.answer('Введите корректную сумму:')
+        return
+    await msg.answer('Успешно изменено!')
+    await q.set_balance(msg.from_user.id, amount)
+    await state.clear()

@@ -15,8 +15,7 @@ class StatusEnum(PyEnum):
 
 class User(Base):
     __tablename__ = 'users'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    tg_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
     balance: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
 
@@ -28,14 +27,15 @@ class User(Base):
         server_onupdate=func.now(),
         nullable=False)
 
-    expenses = relationship('Expense', back_populates='user', cascade='all, delete-orphan')
-    planned_expenses = relationship('PlannedExpense', back_populates='user', cascade='all, delete-orphan')
+    spendings = relationship('Spending', back_populates='user', cascade='all, delete-orphan')
+    planned_spendings = relationship('PlannedSpending', back_populates='user', cascade='all, delete-orphan')
 
 
-class Expense(Base):
-    __tablename__ = 'expenses'
+class Spending(Base):
+    __tablename__ = 'spendings'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
     amount: Mapped[int] = mapped_column(Float, nullable=False)
     comment: Mapped[str] = mapped_column(Text, nullable=True)
 
@@ -47,13 +47,14 @@ class Expense(Base):
         server_onupdate=func.now(),
         nullable=False)
 
-    user = relationship('User', back_populates='expenses')
+    user = relationship('User', back_populates='spendings')
 
 
-class PlannedExpense(Base):
-    __tablename__ = 'planned_expenses'
+class PlannedSpending(Base):
+    __tablename__ = 'planned_spendings'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
     amount: Mapped[int] = mapped_column(Float, nullable=False)
     comment: Mapped[str] = mapped_column(Text, nullable=True)
     remind_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
@@ -71,4 +72,4 @@ class PlannedExpense(Base):
         server_onupdate=func.now(),
         nullable=False)
 
-    user = relationship('User', back_populates='planned_expenses')
+    user = relationship('User', back_populates='planned_spendings')
