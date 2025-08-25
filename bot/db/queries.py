@@ -40,13 +40,17 @@ async def add_balance(tg_id: int, amount: float) -> None:
         await session.commit()
 
 
-async def add_spending(tg_id: int, title:str, amount: float, comment: Optional[str]) -> None:
+async def add_spending(tg_id: int, title: str, amount: float, comment: Optional[str]) -> None:
     async with async_session() as session:
         q = await session.execute(select(User).where(User.id == tg_id))
         user: Optional[User] = q.scalar_one_or_none()
         if not user:
             raise RuntimeError(f'User {tg_id} not found')
+        if user.balance < amount:
+            raise RuntimeError(f'User({tg_id})\'s balance is not enough for creating this spending.\n'
+                               f'Balance: {user.balance}\nSpending: {amount}')
         spending = Spending(user_id=user.id, title=title, amount=amount, comment=comment)
+        user.balance -= amount
         session.add(spending)
         await session.commit()
 
@@ -74,18 +78,32 @@ async def get_spendings_sum(tg_id: int) -> Optional[float]:
         return float(total or 0.0)
 
 
-async def add_planned(tg_id: int, amount: float, comment: Optional[str], remind_at: datetime) -> None:
+async def add_planned(tg_id: int, title: str, amount: float, comment: Optional[str], remind_at: datetime) -> None:
     async with async_session() as session:
         q = await session.execute(select(User).where(User.id == tg_id))
         user = q.scalar_one_or_none()
         if not user:
             raise RuntimeError(f'User {tg_id} not found')
-        p = PlannedSpending(user_id=tg_id, amount=amount, comment=comment, remind_at=remind_at)
+        p = PlannedSpending(user_id=tg_id, title=title, amount=amount, comment=comment, remind_at=remind_at)
         session.add(p)
         await session.commit()
 
 
-async def get_planned() -> List[Dict[str, Any]]:
+async def get_planned(tg_id: int, limit: int = 50) -> Optional[List[PlannedSpending]]:
+    async with async_session() as session:
+        q = await session.execute(select(User).where(User.id == tg_id))
+        user: Optional[User] = q.scalar_one_or_none()
+        if not user:
+            raise RuntimeError(f'User {tg_id} not found')
+        planned = await session.scalars(
+            select(PlannedSpending)
+            .where(PlannedSpending.user_id == user.id)
+            .order_by(PlannedSpending.updated_at.desc())
+            .limit(limit))
+        return planned.all()
+
+
+async def get_all_planned() -> List[Dict[str, Any]]:
     async with async_session() as session:
         now = datetime.now()
         res = await session.execute(

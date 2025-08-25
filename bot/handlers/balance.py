@@ -16,9 +16,7 @@ async def cmd_balance(msg: Message):
         await q.create_user(msg.from_user.id, msg.from_user.username)
         current = 0.0
     else:
-        initial = float(user.balance)
-        spent = await q.get_spendings_sum(msg.from_user.id)
-        current = initial - spent
+        current = user.balance
     await msg.answer(f'Ваш баланс: {current}')
 
 

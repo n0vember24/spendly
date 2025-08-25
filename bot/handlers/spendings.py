@@ -14,7 +14,7 @@ async def spending_create_state(msg: Message, state: FSMContext):
     await msg.answer('Процесс создания нового расхода.\n'
                      'Пожалуйста, введите заголовок для него:')
     user = await q.get_user(msg.from_user.id)
-    if not await user:
+    if not user:
         await q.create_user(msg.from_user.id, msg.from_user.username)
 
     await state.update_data(status='creating')

@@ -9,14 +9,14 @@ router = Router()
 
 @router.message(Command('start'))
 async def cmd_start(msg: Message):
-    user = await q.get_user(msg.from_user.id)
-    if not user:
-        await q.create_user(msg.from_user.id, msg.from_user.username)
-        await msg.answer('Ты зарегистрировался в боте')
     await msg.answer(
         'Добро пожаловать в Spendly!\n'
         'Этот бот поможет тебе в управлении с твоими расходами\n'
         '/help - для подробностей')
+
+    user = await q.get_user(msg.from_user.id)
+    if not user:
+        await q.create_user(msg.from_user.id, msg.from_user.username)
 
 
 @router.message(Command('help'))
@@ -27,4 +27,5 @@ async def cmd_help(msg: Message):
         '/set - Изменить баланс\n'
         '/spend - сохранить расход\n'
         '/spendings\\_list - список расходов\n'
-        '/plan - Запланировать расход')
+        '/plan - Запланировать расход\n'
+        '/planned\\_list - список расходов\n')
