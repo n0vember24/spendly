@@ -39,6 +39,12 @@ async def spending_amount_create_state(msg: Message, state: FSMContext):
         await msg.answer('Пожалуйста, введите корректное значение числа.\n'
                          'Например: 10 000:')
         return
+
+    balance = await q.get_balance(msg.from_user.id)
+    if amount > balance:
+        await msg.answer('У вас недостаточно средств. Поменяйте значение или пополните счёт.')
+        return
+
     await msg.answer('Введите краткое описание текущего расхода\n'
                      'Или введите "`Оставить пустым`" чтобы оставить пустым:')
     await state.update_data(amount=amount)

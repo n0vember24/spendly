@@ -14,8 +14,8 @@ async def cmd_start(msg: Message):
         'Этот бот поможет тебе в управлении с твоими расходами\n'
         '/help - для подробностей')
 
-    user = await q.get_user(msg.from_user.id)
-    if not user:
+    user_exists = await q.if_exists(msg.from_user.id)
+    if not user_exists:
         await q.create_user(msg.from_user.id, msg.from_user.username)
 
 
