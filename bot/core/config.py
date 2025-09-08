@@ -1,7 +1,7 @@
 import logging
 import os
 
-from bot.utils.dotenv import load_dotenv
+from settings.utils.dotenv import load_dotenv
 
 load_dotenv()
 
