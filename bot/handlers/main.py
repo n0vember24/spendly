@@ -1,22 +1,22 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
-from bot.db import queries as q
+from bot import keyboards as kb
 
 router = Router()
 
 
 @router.message(Command('start'))
 async def cmd_start(msg: Message):
-    await msg.answer(
-        'Добро пожаловать в Spendly!\n'
-        'Этот бот поможет тебе в управлении с твоими расходами\n'
-        '/help - для подробностей')
+    await msg.answer('Добро пожаловать в Spendly!\n'
+                     'Этот бот поможет тебе в управлении с твоими расходами\n'
+                     '/help - для подробностей', reply_markup=kb.main)
 
-    user_exists = await q.if_exists(msg.from_user.id)
-    if not user_exists:
-        await q.create_user(msg.from_user.id, msg.from_user.username)
+
+@router.callback_query(F.data == 'home')
+async def cbq_main(cbq: CallbackQuery):
+    await cbq.message.edit_text('Выберите опции ниже:', reply_markup=kb.main)
 
 
 @router.message(Command('help'))

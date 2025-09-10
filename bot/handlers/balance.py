@@ -1,8 +1,11 @@
-from aiogram import Router
+from typing import Union
+
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
+from bot import keyboards as kb
 from bot.db import queries as q
 from bot.filters.balance import BalanceTypeFilter
 from bot.states.balance import Balance
@@ -11,22 +14,19 @@ router = Router()
 
 
 @router.message(Command('balance'))
-async def cmd_balance(msg: Message):
-    balance = await q.get_balance(msg.from_user.id)
-    if balance is None:
-        await q.create_user(msg.from_user.id, msg.from_user.username)
-        balance = 0.0
-    await msg.answer(f'Ваш баланс: {balance}')
+@router.callback_query(F.data == 'balance')
+async def cmd_balance(msg_or_cbq: Union[Message, CallbackQuery]):
+    balance = await q.get_balance(msg_or_cbq.from_user.id)
+    text = f'Ваш баланс: {balance}'
+    if isinstance(msg_or_cbq, Message):
+        await msg_or_cbq.answer(text, reply_markup=kb.balance)
+    else:
+        await msg_or_cbq.message.edit_text(text, reply_markup=kb.balance)
 
 
 @router.message(Command('deposit'))
 async def cmd_deposit(msg: Message, state: FSMContext):
     await msg.answer('Введите сумму депозита:')
-
-    user_exists = await q.if_exists(msg.from_user.id)
-    if not user_exists:
-        await q.create_user(msg.from_user.id, msg.from_user.username)
-
     await state.update_data(type='depo')
     await state.set_state(Balance.amount)
 
@@ -46,11 +46,6 @@ async def balance_deposit_state(msg: Message, state: FSMContext):
 @router.message(Command('set'))
 async def cmd_set(msg: Message, state: FSMContext):
     await msg.answer('Введите новую сумму вашего баланса:')
-
-    user_exists = await q.if_exists(msg.from_user.id)
-    if not user_exists:
-        await q.create_user(msg.from_user.id, msg.from_user.username)
-
     await state.update_data(type='set')
     await state.set_state(Balance.amount)
 
