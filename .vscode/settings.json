@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        ".venv": true,
+        ".idea": true,
+        ".vscode": true
+    },
+    "hide-files.files": [
+        ".venv",
+        ".idea",
+        ".vscode"
+    ]
+}

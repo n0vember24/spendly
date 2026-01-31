@@ -9,8 +9,7 @@ main = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text='Мои расходы', callback_data='my_spendings'),
         InlineKeyboardButton(text='Мои запланированные', callback_data='my_planned'),
     ],
-    [InlineKeyboardButton(text='Мой баланс', callback_data='balance'),
-     InlineKeyboardButton(text='Тест', switch_inline_query_current_chat='АХАХАХА НУ ТЫ И ЛОШАРА')]
+    [InlineKeyboardButton(text='Мой баланс', callback_data='balance')]
 ])
 
 balance = InlineKeyboardMarkup(inline_keyboard=[[
@@ -18,3 +17,10 @@ balance = InlineKeyboardMarkup(inline_keyboard=[[
     InlineKeyboardButton(text='Изменить', callback_data='set_balance'),
     InlineKeyboardButton(text='Домой', callback_data='home')
 ]])
+
+balance_or_home = InlineKeyboardMarkup(inline_keyboard=[[
+    InlineKeyboardButton(text='Баланс', callback_data='balance'),
+    InlineKeyboardButton(text='Домой', callback_data='home')
+]])
+
+cancel = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='cancel')]])

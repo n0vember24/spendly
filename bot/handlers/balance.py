@@ -25,11 +25,26 @@ async def cmd_balance(msg_or_cbq: Union[Message, CallbackQuery]):
 
 
 @router.message(Command('deposit'))
-async def cmd_deposit(msg: Message, state: FSMContext):
-    await msg.answer('Введите сумму депозита:')
+@router.callback_query(F.data=='deposit')
+async def cmd_deposit(msg_or_cbq: Union[Message, CallbackQuery], state: FSMContext):
+    deposit_text = 'Введите сумму депозита:'
+    if isinstance(msg_or_cbq, Message):
+        await msg_or_cbq.answer(deposit_text, reply_markup=kb.cancel)
+    else:
+        await msg_or_cbq.message.edit_text(deposit_text, reply_markup=kb.cancel)
     await state.update_data(type='depo')
     await state.set_state(Balance.amount)
 
+
+@router.message(Command('cancel'))
+@router.callback_query(F.data=='cancel')
+async def state_cancel(msg_or_cbq:Union[Message, CallbackQuery], state: FSMContext):
+    cancel_text = 'Операция была отменена.'
+    if isinstance(msg_or_cbq, Message):
+        await msg_or_cbq.answer(cancel_text, reply_markup=kb.balance_or_home)
+    else:
+        await msg_or_cbq.message.edit_text(cancel_text, reply_markup=kb.balance_or_home)
+    await state.clear()
 
 @router.message(Balance.amount, BalanceTypeFilter('depo'))
 async def balance_deposit_state(msg: Message, state: FSMContext):
@@ -38,7 +53,7 @@ async def balance_deposit_state(msg: Message, state: FSMContext):
     except ValueError:
         await msg.answer('Введите корректную сумму:')
         return
-    await msg.answer('Успешно добавлено!')
+    await msg.answer('Успешно добавлено!', reply_markup=kb.balance_or_home)
     await q.deposit(msg.from_user.id, amount)
     await state.clear()
 
@@ -54,9 +69,9 @@ async def cmd_set(msg: Message, state: FSMContext):
 async def balance_set_state(msg: Message, state: FSMContext):
     try:
         amount = float(msg.text.replace(' ', ''))
-    except ValueError:
+    except ValueError:      
         await msg.answer('Введите корректную сумму:')
         return
-    await msg.answer('Успешно изменено!')
+    await msg.answer('Успешно изменено!', reply_markup=kb.balance_or_home)
     await q.set_balance(msg.from_user.id, amount)
     await state.clear()
